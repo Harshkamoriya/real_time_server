@@ -80,10 +80,24 @@ io.on('connection', (socket) => {
   });
 
   // Receiver tells: read
-  socket.on('read', ({ messageId, senderId }) => {
-    console.log('👀 read event:', messageId);
-    io.to(senderId).emit('read-confirmation', { messageId });
-  });
+socket.on('mark-seen', async ({ conversationId, receiverId , senderId}) => {
+  try {
+    // find senderId
+   
+    console.log("inside mark seen backend server")
+    // emit to receiver (confirm)
+    socket.to(receiverId.toString()).emit('seen-confirmation', { conversationId });
+
+    // emit to sender
+    if (senderId) {
+      socket.to(senderId.toString()).emit('seen-confirmation', { conversationId});
+    }
+  } catch (error) {
+    console.error('Error in mark-seen:', error);
+  }
+});
+
+
 
   // Typing indicator
 socket.on('typing', ({ otherUserId }) => {
@@ -95,6 +109,15 @@ socket.on('typing', ({ otherUserId }) => {
     console.log("yes user id is there");
     io.to(stringUserId).emit('typing', { otherUserId: stringUserId });
   }
+});
+
+socket.on('message-delete', ({ message }) => {
+  console.log("inside message delete server");
+  const receiverId = message?.receiver?.toString();
+  const senderId = message?.sender?.toString();
+    io.to(senderId).emit('message-deleted', { messageId: message?._id });
+
+  io.to(receiverId).emit('message-deleted', { messageId: message?._id });
 });
 
 
