@@ -122,12 +122,9 @@ socket.on('message-delete', ({ message }) => {
 
 
   // Notifications
-  socket.on('sendNotification', (notification) => {
-    const targetUserId = notification.userId;
-    if (targetUserId) {
-      io.to(targetUserId).emit('newNotification', notification);
-    }
-  });
+  socket.on('newNotification', (notification) => {
+  io.to(notification.userId.toString()).emit('newNotification', notification);
+});
 
   socket.on('disconnect', () => {
     console.log('❌ User disconnected:', userId);
